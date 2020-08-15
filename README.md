@@ -1,6 +1,6 @@
 # mine-sweeper
 
-A [reagent](https://github.com/reagent-project/reagent) application designed to ... well, that part is up to you.
+A clojure/clojurescript implementation of the classic game, just 'cause I wanna.
 
 ## Development Mode
 
