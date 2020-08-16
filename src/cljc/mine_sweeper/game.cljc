@@ -1,24 +1,56 @@
 (ns mine-sweeper.game)
 
+(defn- calc-mine-locations
+  [cell-count density]
+  (->> (range cell-count)
+       (random-sample 0.7)
+       (take (Math/ceil (* density cell-count)))
+       set))
+
+(defn- index->point
+  [index {:keys [width]}]
+  [(mod index width) (/ index width)])
+
+(defn- point->index
+  [[x y] {:keys [width]}]
+  (+ (* y width) x))
+
+(defn- touching-indices
+  [index options]
+  (let [[x y] (index->point index options)]
+    (->> (for [xx (remove neg? (range (- x 1) (+ x 2)))
+               yy (remove neg? (range (- y 1) (+ y 2)))]
+           [xx yy])
+         (map #(point->index % options))
+         (remove #(= index %)))))
+
+(defn- append-adjacencies
+  [mine-indices options cells]
+  (->> mine-indices
+       (mapcat #(touching-indices % options))
+       (reduce #(update-in %1 [%2 :adjacent] (fnil inc 0))
+               cells)))
+
 (defn create
   "Create a new game with a board of the specified width and height"
   [{:keys [height
            width
-           density]
+           density
+           mine-indices]
+    :as options
     :or {height 5
          width 5
          density 0.25}}]
 
   (let [cell-count (* width height)
-        mine-indices (->> (range cell-count)
-                          (random-sample 0.7)
-                          (take (Math/ceil (* density cell-count)))
-                          set)]
+        mine-indices (or mine-indices
+                         (calc-mine-locations cell-count density))]
     {:board (->> (range cell-count)
-                 (map (fn [i]
+                 (mapv (fn [i]
                         (cond-> {}
                           (contains? mine-indices i)
                           (assoc :mine true))))
+                 (append-adjacencies mine-indices options)
                  (partition width))}))
 
 (defn dig

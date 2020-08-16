@@ -1,5 +1,5 @@
 (ns mine-sweeper.game-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
             [mine-sweeper.game :as game]))
 
 (deftest create-a-game
@@ -14,6 +14,37 @@
                   (filter :mine)
                   (count)))
         "The number of mines is equal to the density times the cell count")))
+
+(def ^:private adjacency-tests
+  [{:options {:width 3
+              :height 3
+              :mine-indices [0]}
+    :expected [nil 1   nil
+               1   1   nil
+               nil nil nil]}
+   {:options {:width 3
+              :height 3
+              :mine-indices [1]}
+    :expected [1   nil 1
+               1   1   1
+               nil nil nil]}
+   {:options {:width 3
+              :height 3
+              :mine-indices [2]}
+    :expected [nil 1   nil 
+               nil 1   1
+               nil nil nil]}])
+
+(deftest set-adjacencies
+  (doseq [{:keys [options expected]} adjacency-tests]
+    (let [{:keys [board]} (game/create options)]
+      (testing (format "%s x %s with mines at %s"
+                       (:width options)
+                       (:height options)
+                       (:mine-indices options))
+        (is (= expected
+               (map :adjacent (apply concat board)))
+            "The adjacent values are correct")))))
 
 (deftest dig-up-a-cell
   (is (= {:board [[{:dug true} {}]
