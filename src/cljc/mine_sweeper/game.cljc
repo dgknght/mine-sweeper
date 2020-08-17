@@ -9,18 +9,30 @@
 
 (defn- index->point
   [index {:keys [width]}]
-  [(mod index width) (/ index width)])
+  [(mod index width) (quot index width)])
 
 (defn- point->index
   [[x y] {:keys [width]}]
   (+ (* y width) x))
 
+(defn- valid-x?
+  [[x _] {:keys [width]}]
+  (and (not (neg? x))
+       (< x width)))
+
+(defn- valid-y?
+  [[_ y] {:keys [height]}]
+  (and (not (neg? y))
+       (< y height)))
+
 (defn- touching-indices
   [index options]
   (let [[x y] (index->point index options)]
-    (->> (for [xx (remove neg? (range (- x 1) (+ x 2)))
-               yy (remove neg? (range (- y 1) (+ y 2)))]
+    (->> (for [yy (take 3 (iterate inc (- y 1)))
+               xx (take 3 (iterate inc (- x 1)))]
            [xx yy])
+         (filter #(valid-x? % options))
+         (filter #(valid-y? % options))
          (map #(point->index % options))
          (remove #(= index %)))))
 
@@ -28,7 +40,8 @@
   [mine-indices options cells]
   (->> mine-indices
        (mapcat #(touching-indices % options))
-       (reduce #(update-in %1 [%2 :adjacent] (fnil inc 0))
+       frequencies
+       (reduce #(assoc-in %1 [(first %2) :adjacent] (second %2))
                cells)))
 
 (defn create

@@ -1,5 +1,6 @@
 (ns mine-sweeper.game-test
   (:require [clojure.test :refer [deftest is testing]]
+            [clojure.pprint :refer [pprint]]
             [mine-sweeper.game :as game]))
 
 (deftest create-a-game
@@ -18,22 +19,34 @@
 (def ^:private adjacency-tests
   [{:options {:width 3
               :height 3
-              :mine-indices [0]}
+              :mine-indices #{0}}
     :expected [nil 1   nil
                1   1   nil
                nil nil nil]}
    {:options {:width 3
               :height 3
-              :mine-indices [1]}
+              :mine-indices #{1}}
     :expected [1   nil 1
                1   1   1
                nil nil nil]}
    {:options {:width 3
               :height 3
-              :mine-indices [2]}
+              :mine-indices #{2}}
     :expected [nil 1   nil 
                nil 1   1
-               nil nil nil]}])
+               nil nil nil]}
+   {:options {:width 3
+              :height 3
+              :mine-indices #{0 2}}
+    :expected [nil 2   nil
+               1   2   1
+               nil nil nil]}
+   {:options {:width 3
+              :height 3
+              :mine-indices #{4}}
+    :expected [1   1   1
+               1   nil 1
+               1   1   1]}])
 
 (deftest set-adjacencies
   (doseq [{:keys [options expected]} adjacency-tests]
