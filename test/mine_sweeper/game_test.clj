@@ -1,6 +1,5 @@
 (ns mine-sweeper.game-test
   (:require [clojure.test :refer [deftest is testing]]
-            [clojure.pprint :refer [pprint]]
             [mine-sweeper.game :as game]))
 
 (deftest create-a-game

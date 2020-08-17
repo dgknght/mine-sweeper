@@ -7,11 +7,11 @@
        (take (Math/ceil (* density cell-count)))
        set))
 
-(defn- index->point
+(defn index->point
   [index {:keys [width]}]
   [(mod index width) (quot index width)])
 
-(defn- point->index
+(defn point->index
   [[x y] {:keys [width]}]
   (+ (* y width) x))
 
@@ -44,6 +44,13 @@
        (reduce #(assoc-in %1 [(first %2) :adjacent] (second %2))
                cells)))
 
+(defn- gridify
+  [{:keys [width]} cells]
+  (->> cells
+       (partition width)
+       (map vec)
+       vec))
+
 (defn create
   "Create a new game with a board of the specified width and height"
   [{:keys [height
@@ -60,17 +67,21 @@
                          (calc-mine-locations cell-count density))]
     {:board (->> (range cell-count)
                  (mapv (fn [i]
-                        (cond-> {}
+                        (cond-> (with-meta {} {:index i})
                           (contains? mine-indices i)
                           (assoc :mine true))))
                  (append-adjacencies mine-indices options)
-                 (partition width))}))
+                 (gridify options))
+     :options options}))
 
 (defn dig
   "Dig up a cell to see if there is a mine there. Digging up a
   cell with a mine will end the game. Otherwise, the cell is opened"
-  [g [x y]]
-  (let [cell (get-in g [:board y x])]
+  [g cell-id]
+  (let [[x y] (if (sequential? cell-id)
+                cell-id
+                (index->point cell-id (:options g)))
+        cell (get-in g [:board y x])]
     (if (:mine cell)
       (-> g
           (assoc :result :lose)
@@ -81,8 +92,11 @@
 
 (defn flag
   "Mark a cell indicating the player believes there is a bomb there."
-  [g [x y]]
-  (let [cell (get-in g [:board y x])]
+  [g cell-id]
+  (let [[x y] (if (sequential? cell-id)
+                cell-id
+                (index->point cell-id (:options g)))
+        cell (get-in g [:board y x])]
     (if (:dug cell)
       g
       (assoc-in g [:board y x :flagged] true))))

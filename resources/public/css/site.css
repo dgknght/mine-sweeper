@@ -1,0 +1,12 @@
+.cell {
+  margin: 2px;
+  width: 2em;
+  height: 2em;
+  text-align: center;
+  border: 1px solid var(--dark);
+  background-color: var(--gray);
+}
+
+.dug {
+  background-color: var(--light);
+}
