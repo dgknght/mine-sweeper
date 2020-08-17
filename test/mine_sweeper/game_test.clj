@@ -73,3 +73,19 @@
                             [{} {}]]}
                    [0 0]))
       "Digging up a cell with a mine causes the mine to explode"))
+
+(deftest flag-a-cell
+  (testing "An undug cell can be flagged"
+    (is (= {:board [[{} {:flagged true}]
+                    [{} {}]]}
+           (game/flag {:board [[{} {}]
+                               [{} {}]]}
+                      [1 0]))
+        "The specified cell is flagged"))
+  (testing "An dug cell can be flagged"
+    (is (= {:board [[{} {:dug true}]
+                    [{} {}]]}
+           (game/flag {:board [[{} {:dug true}]
+                               [{} {}]]}
+                      [1 0]))
+        "The specified cell is flagged")))

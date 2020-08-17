@@ -78,3 +78,11 @@
                                        (dissoc :mine)
                                        (assoc :exploded true))))
       (assoc-in g [:board y x :dug] true))))
+
+(defn flag
+  "Mark a cell indicating the player believes there is a bomb there."
+  [g [x y]]
+  (let [cell (get-in g [:board y x])]
+    (if (:dug cell)
+      g
+      (assoc-in g [:board y x :flagged] true))))
