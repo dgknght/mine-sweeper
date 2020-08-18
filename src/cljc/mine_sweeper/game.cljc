@@ -9,8 +9,7 @@
 (defn- calc-mine-locations
   [cell-count density]
   (->> (range cell-count)
-       (random-sample 0.7)
-       (take (Math/ceil (* density cell-count)))
+       (random-sample density)
        set))
 
 (defn index->point
@@ -32,15 +31,18 @@
        (< y height)))
 
 (defn- touching-indices
-  [index options]
-  (let [[x y] (index->point index options)]
-    (->> (for [yy (take 3 (iterate inc (- y 1)))
-               xx (take 3 (iterate inc (- x 1)))]
-           [xx yy])
-         (filter #(valid-x? % options))
-         (filter #(valid-y? % options))
-         (map #(point->index % options))
-         (remove #(= index %)))))
+  ([index options]
+   (let [[x y] (index->point index options)]
+     (map #(point->index % options)
+          (touching-indices x y options))))
+  ([x y options]
+   (->> (for [yy (take 3 (iterate inc (- y 1)))
+              xx (take 3 (iterate inc (- x 1)))]
+          [xx yy])
+        (filter #(valid-x? % options))
+        (filter #(valid-y? % options))
+        (remove #(and (= x (first %))
+                      (= y (second %)))))))
 
 (defn- append-adjacencies
   [mine-indices options cells]
@@ -92,6 +94,20 @@
     (assoc g :result :win)
     g))
 
+(defn- clear-touched
+  [g [x y]]
+  (update-in g
+             [:board]
+             (fn [board]
+               (reduce (fn [b point]
+                         (update-in b
+                                    (reverse point)
+                                    #(if (:mine %)
+                                       %
+                                       (assoc % :dug true))))
+                       board
+                       (touching-indices x y (:options g))))))
+
 (defn dig
   "Dig up a cell to see if there is a mine there. Digging up a
   cell with a mine will end the game. Otherwise, the cell is opened"
@@ -108,6 +124,7 @@
                                        (assoc :exploded true))))
       (-> g
           (assoc-in [:board y x :dug] true)
+          (clear-touched [x y])
           check-for-win))))
 
 (defn flag

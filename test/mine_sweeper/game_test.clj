@@ -10,10 +10,12 @@
         "A board is created with the specified number of rows (height)")
     (is (apply = 4 (map count board))
         "A board is created with the specified number of columns (width)")
-    (is (= 4 (->> (apply concat board)
-                  (filter :mine)
-                  (count)))
-        "The number of mines is equal to the density times the cell count")))
+    (let [actual (->> (apply concat board)
+                      (filter :mine)
+                      (count))
+          diff (- actual 4)]
+      (is (<= diff 1)
+          "The number of mines is approximately equal to the density times the cell count"))))
 
 (def ^:private adjacency-tests
   [{:options {:width 3
@@ -59,11 +61,13 @@
             "The adjacent values are correct")))))
 
 (deftest dig-up-a-cell
-  (is (= {:board [[{:dug true} {}]
-                  [{} {}]]}
-         (game/dig {:board [[{} {}]
-                            [{} {}]]}
-                   [0 0]))
+  (is (= [[{:dug true}  {:mine true}]
+          [{:mine true} {:dug true}]] ; TODO: should the diagonal touches be cleared?
+         (:board (game/dig {:board [[{}           {:mine true}]
+                                    [{:mine true} {}]]
+                            :options {:width 2
+                                      :height 2}}
+                           [0 0])))
       "Digging up a cell without a mine does not end the game")
   (is (= {:board [[{:exploded true} {}]
                   [{} {}]]
