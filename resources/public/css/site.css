@@ -5,8 +5,22 @@
   text-align: center;
   border: 1px solid var(--dark);
   background-color: var(--gray);
+  cursor: pointer;
 }
 
 .dug {
   background-color: var(--light);
+}
+
+.exploded {
+  background-color: var(--red);
+  color: var(--white);
+}
+
+.result {
+  font-size: 130%;
+}
+
+.lose {
+  color: var(--red);
 }

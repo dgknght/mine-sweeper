@@ -1,4 +1,10 @@
-(ns mine-sweeper.game)
+(ns mine-sweeper.game
+  #_(:require #?(:clj [clojure.pprint :refer [pprint]])))
+
+#_(defn- log
+  [msg]
+  #?(:cljs (.log js/console (prn-str msg))
+     :clj (pprint msg)))
 
 (defn- calc-mine-locations
   [cell-count density]
@@ -41,7 +47,10 @@
   (->> mine-indices
        (mapcat #(touching-indices % options))
        frequencies
-       (reduce #(assoc-in %1 [(first %2) :adjacent] (second %2))
+       (reduce (fn [result [index adjacencies]]
+                 (if (get-in result [index :mine])
+                   result
+                   (assoc-in result [index :adjacent] adjacencies)))
                cells)))
 
 (defn- gridify
@@ -74,6 +83,15 @@
                  (gridify options))
      :options options}))
 
+(defn- check-for-win
+  [{:keys [board] :as g}]
+  (if (->> (apply concat board)
+           (remove :mine)
+           (remove :dug)
+           empty?)
+    (assoc g :result :win)
+    g))
+
 (defn dig
   "Dig up a cell to see if there is a mine there. Digging up a
   cell with a mine will end the game. Otherwise, the cell is opened"
@@ -88,7 +106,9 @@
           (update-in [:board y x] #(-> %
                                        (dissoc :mine)
                                        (assoc :exploded true))))
-      (assoc-in g [:board y x :dug] true))))
+      (-> g
+          (assoc-in [:board y x :dug] true)
+          check-for-win))))
 
 (defn flag
   "Mark a cell indicating the player believes there is a bomb there."
