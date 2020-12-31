@@ -1,7 +1,7 @@
 (ns mine-sweeper.core
   (:require [clojure.string :as string]
             [reagent.core :as r]
-            #_[mine-sweeper.util :as util]
+            [mine-sweeper.bootstrap :as bs]
             [mine-sweeper.game :as ms]))
 
 (defonce app-state
@@ -37,14 +37,14 @@
     (:flagged cell)
     (if (and result
              (:mine cell))
-      "FB"
-      "F")
+      (bs/icon :bomb)
+      (bs/icon :flag-fill))
 
     (:exploded cell)
     "*"
 
     result
-    (when (:mine cell) "B")))
+    (when (:mine cell) (bs/icon :bomb))))
 
 (defn- game-cell
   [cell {:keys [result] :as game} state]
