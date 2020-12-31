@@ -85,10 +85,10 @@
                                [{} {}]]}
                       [1 0]))
         "The specified cell is flagged"))
-  (testing "An dug cell can be flagged"
+  (testing "A dug cell cannot be flagged"
     (is (= {:board [[{} {:dug true}]
                     [{} {}]]}
            (game/flag {:board [[{} {:dug true}]
                                [{} {}]]}
                       [1 0]))
-        "The specified cell is flagged")))
+        "The specified cell is not flagged")))
