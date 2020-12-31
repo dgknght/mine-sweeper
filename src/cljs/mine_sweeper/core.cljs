@@ -1,6 +1,7 @@
 (ns mine-sweeper.core
   (:require [clojure.string :as string]
             [reagent.core :as r]
+            #_[mine-sweeper.util :as util]
             [mine-sweeper.game :as ms]))
 
 (defonce app-state
@@ -27,23 +28,38 @@
                       ["cell"
                        result]))))
 
+(defn- game-cell-content
+  [cell {:keys [result]}]
+  (cond
+    (:dug cell)
+    (:adjacent cell)
+
+    (:flagged cell)
+    (if (and result
+             (:mine cell))
+      "FB"
+      "F")
+
+    (:exploded cell)
+    "*"
+
+    result
+    (when (:mine cell) "B")))
+
 (defn- game-cell
-  [cell state]
-  (let [index (-> cell meta :index)
-        result (r/cursor state [:game :result])]
+  [cell {:keys [result] :as game} state]
+  (let [index (-> cell meta :index)]
     ^{:key (str "game-cell-" index)}
-    [:div (cond-> {:class (cell-class cell @result)}
-            (nil? @result) (assoc :on-click #(handle-click % index state)))
-     (cond
-       (:dug cell)      (:adjacent cell)
-       (:flagged cell)  "F"
-       (:exploded cell) "*")]))
+    [:div.d-flex.align-items-center.justify-content-center
+     (cond-> {:class (cell-class cell result)}
+       (nil? result) (assoc :on-click #(handle-click % index state)))
+     (game-cell-content cell game)]))
 
 (defn- game-row
-  [row state]
+  [row game state]
   ^{:key (str "game-row-" (:index (meta (first row))))}
   [:div.d-flex
-   (doall (map #(game-cell % state) row))])
+   (doall (map #(game-cell % game state) row))])
 
 (defn- render-board
   [state]
@@ -51,7 +67,8 @@
     (fn []
       (when @game
         [:div
-         (doall (map #(game-row % state) (:board @game)))]))))
+         (doall (map #(game-row % @game state)
+                     (:board @game)))]))))
 
 (defn- render-result
   [state]
