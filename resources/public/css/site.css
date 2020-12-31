@@ -3,18 +3,18 @@
   width: 2em;
   height: 2em;
   text-align: center;
-  border: 1px solid var(--dark);
-  background-color: var(--gray);
+  border: 1px solid var(--bs-dark);
+  background-color: var(--bs-gray);
   cursor: pointer;
 }
 
 .dug {
-  background-color: var(--light);
+  background-color: var(--bs-light);
 }
 
 .exploded {
-  background-color: var(--red);
-  color: var(--white);
+  background-color: var(--bs-red);
+  color: var(--bs-white);
 }
 
 .result {
@@ -22,5 +22,5 @@
 }
 
 .lose {
-  color: var(--red);
+  color: var(--bs-red);
 }
