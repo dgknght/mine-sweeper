@@ -2,10 +2,12 @@
   (:require [clojure.string :as string]
             [reagent.core :as r]
             [mine-sweeper.bootstrap :as bs]
+            [mine-sweeper.forms :as forms]
             [mine-sweeper.game :as ms]))
 
 (defonce app-state
-  (r/atom {}))
+  (r/atom {:specs {:height 5
+                   :width 5}}))
 
 (defn- handle-click
   [e index state]
@@ -82,18 +84,30 @@
 
 (defn- page
   [state]
-  (fn []
-    [:div.container
-     [:h1.mt-5 "Mine Sweeper"]
-     [render-board state]
-     [render-result state]
-     [:div.mt-3
-      [:button.btn.btn-primary {:on-click #(swap! state
-                                                  assoc
-                                                  :game
-                                                  (ms/create {:width 5
-                                                              :height 5}))}
-       "New Game"]]]))
+  (let [specs (r/cursor state [:specs])]
+    (fn []
+      [:div.container
+       [:h1.mt-5 "Mine Sweeper"]
+       [render-board state]
+       [render-result state]
+       [:div.mt-3.row
+        [:div.col-md-6
+         [:form.row {:no-validate true
+                     :on-submit (fn [e]
+                                  (.preventDefault e)
+                                  (swap! state
+                                         assoc
+                                         :game
+                                         (ms/create @specs)))}
+          [:div.col-sm-4
+           [forms/integer-input specs [:width]]]
+          [:div.col-sm-1.text-center "X"]
+          [:div.col-sm-4
+           [forms/integer-input specs [:height]]]
+          [:div.col-sm-3
+           [:button.btn.btn-primary
+            {:type :submit}
+            "New Game"]]]]]])))
 
 (defn dev-setup []
   (when ^boolean js/goog.DEBUG
