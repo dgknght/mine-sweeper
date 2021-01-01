@@ -1,16 +1,24 @@
 (defproject mine-sweeper "0.1.0-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
-                 [reagent "0.7.0"]]
+                 [reagent "0.7.0"]
+                 [ring/ring-core "1.8.2"]
+                 [ring/ring-jetty-adapter "1.8.2"]
+                 [hiccup "1.0.5"]]
+
+  :dev-dependencies [[lein/ring-devel "1.8.2"]]
 
   :min-lein-version "2.5.3"
 
   :source-paths ["src/clj" "src/cljc"]
 
-  :plugins [[lein-cljsbuild "1.1.4"]]
+  :plugins [[lein-cljsbuild "1.1.4"]
+            [lein-ring "0.12.5"]]
 
   :clean-targets ^{:protect false} ["resources/public/js"
                                     "target"]
+
+  :ring {:handler mine-sweeper.web/app}
 
   :figwheel {:css-dirs ["resources/public/css"]}
 
@@ -40,6 +48,4 @@
                     :output-dir      "resources/public/js/min"
                     :elide-asserts   true
                     :closure-defines {goog.DEBUG false}
-                    :pretty-print    false}}
-
-    ]})
+                    :pretty-print    false}}]})
