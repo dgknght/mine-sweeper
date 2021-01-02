@@ -4,29 +4,40 @@
                  [reagent "0.7.0"]
                  [ring/ring-core "1.8.2"]
                  [ring/ring-jetty-adapter "1.8.2"]
-                 [hiccup "1.0.5"]]
+                 [hiccup "1.0.5"]
+                 [co.deps/ring-etag-middleware "0.2.1"]]
 
   :dev-dependencies [[lein/ring-devel "1.8.2"]]
 
   :min-lein-version "2.5.3"
 
   :source-paths ["src/clj" "src/cljc"]
+  :resource-paths ["resources"]
 
   :plugins [[lein-cljsbuild "1.1.4"]
-            [lein-ring "0.12.5"]]
+            [lein-ring "0.12.5"]
+            [lein-asset-minifier "0.4.6"]]
 
   :clean-targets ^{:protect false} ["resources/public/js"
                                     "target"]
 
-  :ring {:handler mine-sweeper.web/app}
+  :ring {:handler mine-sweeper.web/app
+         :uberwar-name "mine-sweeper.war"}
+
+  :uberjar-name "mine-sweeper.jar"
+
+  :main mine-sweeper.web
 
   :figwheel {:css-dirs ["resources/public/css"]}
 
   :profiles
-  {:dev
-   {:dependencies []
+  {:dev {:dependencies []
 
-    :plugins      [[lein-figwheel "0.5.15"]]}}
+         :plugins      [[lein-figwheel "0.5.15"]]}
+   :uberjar {:aot :all
+             :hooks [minify-assets.plugin/hooks]
+             :prep-tasks ["compile" ["cljsbuild" "once" "min"]]
+             :omit-source true}}
 
   :cljsbuild
   {:builds
